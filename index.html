@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tặng Kim Cương Free</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Three.js 3D Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        pinkTheme: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #0d0417;
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass-card {
+            background: rgba(255, 240, 245, 0.12);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 182, 193, 0.35);
+            box-shadow: 0 20px 50px rgba(244, 63, 94, 0.25),
+                        inset 0 0 15px rgba(255, 255, 255, 0.15);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #fda4af;
+            color: #881337;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input:focus {
+            background: #ffffff;
+            border-color: #f43f5e;
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.4);
+            outline: none;
+        }
+
+        .btn-pink-3d {
+            background: linear-gradient(135deg, #ff6584 0%, #f43f5e 50%, #be123c 100%);
+            box-shadow: 0 6px 0 #9f1239, 0 10px 20px rgba(244, 63, 94, 0.5);
+            transition: all 0.15s ease;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .btn-pink-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #9f1239, 0 15px 25px rgba(244, 63, 94, 0.6);
+            filter: brightness(1.05);
+        }
+
+        .btn-pink-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #9f1239, 0 5px 10px rgba(244, 63, 94, 0.4);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 12px rgba(244, 63, 94, 0.7), 0 0 25px rgba(251, 113, 133, 0.5);
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23be123c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.25em;
+        }
+
+        .modal-fade-in {
+            animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .modal-pop-in {
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.85) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .sidebar-transition {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen relative selection:bg-pink-500 selection:text-white">
+
+    <!-- 3D Canvas Background -->
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="relative z-10 flex flex-col min-h-screen">
+        <!-- Header Bar -->
+        <header class="w-full bg-slate-900/80 backdrop-blur-md border-b border-pink-500/30 sticky top-0 z-30 px-4 py-3">
+            <div class="max-w-md mx-auto flex justify-between items-center">
+                <!-- Hamburger Menu Button (3 Gạch) -->
+                <button 
+                    onclick="toggleSidebar()" 
+                    aria-label="Open Menu"
+                    class="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-400/50 flex items-center justify-center text-pink-300 hover:bg-pink-500/40 hover:text-white transition-all active:scale-95 shadow-md"
+                >
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+
+                <!-- Title Branding -->
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-pink-500/30 border border-pink-400 flex items-center justify-center text-pink-300 shadow-sm">
+                        <i class="fa-solid fa-gem text-xs"></i>
+                    </div>
+                    <span class="font-bold text-xs sm:text-sm tracking-wide text-pink-200">KIM CƯƠNG FREE</span>
+                </div>
+
+                <!-- Balance Display Badge -->
+                <div class="bg-gradient-to-r from-pink-600/90 to-rose-600/90 px-3.5 py-1.5 rounded-full border border-pink-300/40 shadow-lg flex items-center gap-2">
+                    <div class="w-5 h-5 rounded-full bg-yellow-400 border border-amber-200 flex items-center justify-center text-amber-900 shadow-inner">
+                        <i class="fa-solid fa-sack-dollar text-xs"></i>
+                    </div>
+                    <span class="text-white font-extrabold text-xs sm:text-sm tracking-wider drop-shadow-sm">
+                        Số dư: <span class="text-yellow-300" id="balanceDisplay">20.000đ</span>
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
+            <div class="w-full max-w-md glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden transition-all duration-300">
+                
+                <!-- Ambient Glow Background -->
+                <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-pink-500/30 rounded-full blur-3xl pointer-events-none"></div>
+
+                <!-- User Account Bar (If Logged In) -->
+                <div id="userAccountBanner" class="hidden mb-4 p-2.5 rounded-xl bg-pink-950/60 border border-pink-500/30 flex items-center justify-between text-xs">
+                    <div class="flex items-center gap-2 overflow-hidden">
+                        <div class="w-7 h-7 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold text-xs shrink-0" id="userAvatar">
+                            U
+                        </div>
+                        <div class="truncate">
+                            <p class="font-bold text-pink-100 truncate" id="userNameDisplay">Khách</p>
+                            <p class="text-[10px] text-pink-300/70 truncate" id="userEmailDisplay">Chưa đăng nhập</p>
+                        </div>
+                    </div>
+                    <button onclick="logout()" class="px-2.5 py-1 rounded-lg bg-rose-500/30 text-rose-300 hover:bg-rose-500 hover:text-white font-semibold transition-all shrink-0">
+                        Thoát
+                    </button>
+                </div>
+
+                <!-- Title Header -->
+                <div class="text-center mb-6 sm:mb-8 relative z-10">
+                    <div class="inline-flex items-center justify-center p-3 mb-3 rounded-2xl bg-gradient-to-tr from-pink-500 to-rose-400 text-white shadow-lg shadow-pink-500/30 ring-4 ring-pink-300/20">
+                        <i class="fa-solid fa-gem text-3xl animate-bounce"></i>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-pink-200 to-rose-300 text-glow tracking-wide uppercase">
+                        TẶNG KIM CƯƠNG FREE
+                    </h1>
+                    <p class="text-xs sm:text-sm text-pink-200/80 mt-1 font-medium">
+                        Nhận Kim Cương miễn phí trực tiếp vào ID game của bạn
+                    </p>
+                </div>
+
+                <!-- Main Diamond Form -->
+                <form id="kcForm" onsubmit="handleClaimKC(event)" class="space-y-5 relative z-10">
+                    
+                    <!-- Player ID Input -->
+                    <div>
+                        <label for="playerId" class="block text-xs font-bold text-pink-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-tag text-pink-400"></i> ID Người chơi
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="playerId" 
+                                placeholder="Nhập ID người chơi..." 
+                                autocomplete="off"
+                                class="w-full px-4 py-3.5 rounded-xl glass-input text-base font-semibold placeholder-rose-300/70 shadow-sm"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Diamond Package Select -->
+                    <div>
+                        <label for="kcPackage" class="block text-xs font-bold text-pink-200 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-box-open text-pink-400"></i> Chọn gói KC
+                        </label>
+                        <div class="relative">
+                            <select 
+                                id="kcPackage" 
+                                onchange="updatePriceDisplay()"
+                                class="w-full px-4 py-3.5 rounded-xl glass-input text-base font-bold appearance-none cursor-pointer pr-10 shadow-sm"
+                            >
+                                <option value="113 KC" data-price="20000" selected>113 KC (20.000đ)</option>
+                                <option value="283 KC" data-price="50000">283 KC (50.000đ)</option>
+                                <option value="566 KC" data-price="100000">566 KC (100.000đ)</option>
+                                <option value="1,132 KC" data-price="200000">1,132 KC (200.000đ)</option>
+                                <option value="2,830 KC" data-price="500000">2,830 KC (500.000đ)</option>
+                                <option value="5,750 KC" data-price="1000000">5,750 KC (1.000.000đ)</option>
+                                <option value="11,500 KC" data-price="2000000">11,500 KC (2.000.000đ)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Price Badge -->
+                    <div class="py-2.5 text-center bg-pink-950/40 rounded-xl border border-pink-500/20">
+                        <span class="text-xs uppercase font-semibold text-pink-300 block mb-0.5">Giá thanh toán</span>
+                        <div class="flex items-center justify-center gap-2">
+                            <span id="packagePriceDisplay" class="text-2xl sm:text-3xl font-extrabold text-pink-400 tracking-tight">20.000 đ</span>
+                        </div>
+                    </div>
+
+                    <!-- Claim Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full py-4 rounded-xl text-white font-extrabold text-lg tracking-wider uppercase btn-pink-3d flex items-center justify-center gap-2 mt-4"
+                    >
+                        <span>Nhận KC Ngay</span>
+                        <i class="fa-solid fa-paper-plane text-base"></i>
+                    </button>
+                </form>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="py-4 text-center text-xs text-pink-300/60 font-medium">
+            © 2026 Tặng Kim Cương Free • Hệ Thống Tự Động 24/7
+        </footer>
+    </div>
+
+    <!-- Sidebar Overlay -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden transition-opacity"></div>
+
+    <!-- Sidebar Drawer (Menu 3 Gạch) -->
+    <div id="sidebar" class="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-slate-900/95 border-r border-pink-500/30 z-50 transform -translate-x-full sidebar-transition flex flex-col p-6 shadow-2xl">
+        
+        <!-- Drawer Header -->
+        <div class="flex items-center justify-between pb-5 border-b border-pink-500/20">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-pink-500/20 border border-pink-400 flex items-center justify-center text-pink-400">
+                    <i class="fa-solid fa-bars-staggered text-base"></i>
+                </div>
+                <span class="font-extrabold text-base text-pink-100 uppercase tracking-wide">Danh Mục Menu</span>
+            </div>
+            <button onclick="toggleSidebar()" class="w-8 h-8 rounded-lg bg-pink-950/50 text-pink-300 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Drawer Body -->
+        <div class="flex-1 overflow-y-auto py-6 space-y-6">
+            
+            <!-- SECTION 1: Tài Khoản -->
+            <div class="bg-pink-950/30 border border-pink-500/20 rounded-2xl p-4">
+                <h3 class="text-xs font-bold uppercase text-pink-300 tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-user-gear text-pink-400"></i> 1. Tài Khoản Hệ Thống
+                </h3>
+                <div class="flex gap-2">
+                    <button onclick="openRegisterModal()" class="flex-1 py-2 px-2 rounded-xl bg-pink-600/80 hover:bg-pink-600 text-white font-bold text-xs text-center transition-all">
+                        Đăng Ký Mới
+                    </button>
+                    <button onclick="openLoginModal()" class="flex-1 py-2 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-pink-200 font-bold text-xs text-center border border-pink-500/30 transition-all">
+                        Đăng Nhập
+                    </button>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Admin & Nhập Code Trúng Thưởng -->
+            <div class="bg-pink-950/30 border border-amber-500/30 rounded-2xl p-4 shadow-lg">
+                <h3 class="text-xs font-bold uppercase text-amber-300 tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-crown text-yellow-400"></i> 2. Admin & Code Nhận Tiền
+                </h3>
+                <p class="text-[11px] text-pink-200/70 mb-3">Nhập mã Code thưởng ở dưới để cộng tiền vào tài khoản:</p>
+                
+                <form onsubmit="handleRedeemCode(event)" class="space-y-2 mb-4">
+                    <input 
+                        type="text" 
+                        id="giftCodeInput" 
+                        placeholder="Nhập code (VD: KIMCUONG100K)" 
+                        class="w-full px-3 py-2 rounded-xl glass-input text-xs font-bold uppercase text-center"
+                    />
+                    <button 
+                        type="submit" 
+                        class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 hover:brightness-110 text-white font-extrabold text-xs uppercase tracking-wider transition-all"
+                    >
+                        Nhận Tiền Vô Hạn
+                    </button>
+                </form>
+
+                <button 
+                    onclick="openAdminModal()" 
+                    class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs text-center border border-amber-500/30 transition-all"
+                >
+                    Thông Tin Admin
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="pt-4 border-t border-pink-500/20 text-center">
+            <span class="text-[11px] text-pink-300/50">Hỗ trợ Zalo: 0975787858</span>
+        </div>
+    </div>
+
+    <!-- REGISTER MODAL -->
+    <div id="registerModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden modal-fade-in">
+        <div class="glass-card bg-slate-900/95 border-2 border-pink-400/50 rounded-3xl p-6 sm:p-8 max-w-md w-full relative shadow-2xl modal-pop-in">
+            <button onclick="closeModal('registerModal')" class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-pink-950/50 text-pink-300 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+            <div class="text-center mb-6">
+                <h3 class="text-xl font-black text-white tracking-wide">ĐĂNG KÝ TÀI KHOẢN</h3>
+            </div>
+            <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-3.5">
+                <input type="text" id="regName" required placeholder="Họ và tên..." class="w-full px-3.5 py-2.5 rounded-xl glass-input text-sm font-semibold">
+                <input type="text" id="regUsername" required placeholder="Tên đăng nhập..." class="w-full px-3.5 py-2.5 rounded-xl glass-input text-sm font-semibold">
+                <input type="password" id="regPassword" required placeholder="Mật khẩu..." class="w-full px-3.5 py-2.5 rounded-xl glass-input text-sm font-semibold">
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-pink-600 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg">Đăng Ký</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- LOGIN MODAL -->
+    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden modal-fade-in">
+        <div class="glass-card bg-slate-900/95 border-2 border-pink-400/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full relative shadow-2xl modal-pop-in">
+            <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-pink-950/50 text-pink-300 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+            <div class="text-center mb-6">
+                <h3 class="text-xl font-black text-white tracking-wide">ĐĂNG NHẬP TÀI KHOẢN</h3>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <input type="text" id="loginUsername" required placeholder="Tên đăng nhập..." class="w-full px-3.5 py-3 rounded-xl glass-input text-sm font-semibold">
+                <input type="password" id="loginPassword" required placeholder="Mật khẩu..." class="w-full px-3.5 py-3 rounded-xl glass-input text-sm font-semibold">
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-pink-600 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg">Đăng Nhập</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div id="resultModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden modal-fade-in">
+        <div class="glass-card bg-slate-900/95 border-2 border-pink-400/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center relative shadow-2xl modal-pop-in">
+            <div class="w-16 h-16 bg-gradient-to-tr from-pink-500 to-rose-400 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-3xl shadow-lg ring-4 ring-pink-300/30">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <h3 class="text-2xl font-black text-white mb-2 tracking-wide" id="modalTitle">THÀNH CÔNG!</h3>
+            <div class="my-4 py-4 px-4 bg-pink-950/60 rounded-2xl border border-pink-500/30">
+                <p id="modalMsg" class="text-pink-100 font-semibold text-base sm:text-lg leading-relaxed"></p>
+            </div>
+            <button onclick="closeModal('resultModal')" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 text-white font-extrabold text-base shadow-lg">Đóng</button>
+        </div>
+    </div>
+
+    <!-- ADMIN INFO MODAL -->
+    <div id="adminModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden modal-fade-in">
+        <div class="glass-card bg-slate-900/95 border-2 border-amber-400/50 rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center relative shadow-2xl modal-pop-in">
+            <button onclick="closeModal('adminModal')" class="absolute top-4 right-4 w-8 h-8 rounded-lg bg-pink-950/50 text-pink-300 hover:text-white flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+            <div class="w-16 h-16 bg-gradient-to-tr from-amber-400 to-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-3xl shadow-lg ring-4 ring-amber-300/30">
+                <i class="fa-solid fa-crown text-yellow-100"></i>
+            </div>
+            <h3 class="text-2xl font-black text-white mb-1 tracking-wide">TRỞ THÀNH ADMIN</h3>
+            <p class="text-xs text-pink-200/80 mb-4 font-medium">SĐT / Zalo Admin: 0975787858</p>
+            <button onclick="closeModal('adminModal')" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-600 text-white font-extrabold text-base shadow-lg">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        // Key Storage
+        const BALANCE_KEY = 'free_kc_user_balance';
+
+        // Lấy số dư hiện tại (mặc định 20.000 VNĐ nếu lần đầu vào)
+        function getBalance() {
+            const bal = localStorage.getItem(BALANCE_KEY);
+            if (bal === null) {
+                localStorage.setItem(BALANCE_KEY, '20000');
+                return 20000;
+            }
+            return parseInt(bal);
+        }
+
+        // Cập nhật số dư vào LocalStorage
+        function setBalance(amount) {
+            localStorage.setItem(BALANCE_KEY, amount.toString());
+            updateBalanceUI();
+        }
+
+        // Cập nhật giao diện số dư
+        function updateBalanceUI() {
+            const bal = getBalance();
+            document.getElementById('balanceDisplay').innerText = bal.toLocaleString('vi-VN') + 'đ';
+        }
+
+        // Cập nhật hiển thị giá tiền gói KC được chọn
+        function updatePriceDisplay() {
+            const select = document.getElementById('kcPackage');
+            const selectedOption = select.options[select.selectedIndex];
+            const price = parseInt(selectedOption.getAttribute('data-price'));
+            document.getElementById('packagePriceDisplay').innerText = price.toLocaleString('vi-VN') + ' đ';
+        }
+
+        // Xử lý nạp Kim Cương (Trừ tiền)
+        function handleClaimKC(e) {
+            e.preventDefault();
+            const idInput = document.getElementById('playerId');
+            const idValue = idInput.value.trim();
+            const select = document.getElementById('kcPackage');
+            const kcValue = select.value;
+            const selectedOption = select.options[select.selectedIndex];
+            const price = parseInt(selectedOption.getAttribute('data-price'));
+
+            if (!idValue) {
+                idInput.classList.add('border-red-500');
+                idInput.focus();
+                setTimeout(() => idInput.classList.remove('border-red-500'), 1500);
+                return;
+            }
+
+            const currentBalance = getBalance();
+
+            // Kiểm tra số dư có đủ không
+            if (currentBalance < price) {
+                document.getElementById('modalTitle').innerText = 'THẤT BẠI!';
+                document.getElementById('modalMsg').innerText = `Số dư không đủ! Gói ${kcValue} cần ${price.toLocaleString('vi-VN')}đ. Bạn hiện có ${currentBalance.toLocaleString('vi-VN')}đ. Hãy nhập Code Admin để nhận thêm tiền!`;
+                document.getElementById('resultModal').classList.remove('hidden');
+                return;
+            }
+
+            // Trừ tiền khi đủ điều kiện
+            const newBalance = currentBalance - price;
+            setBalance(newBalance);
+
+            document.getElementById('modalTitle').innerText = 'THÀNH CÔNG!';
+            document.getElementById('modalMsg').innerText = `Chúc Mừng ID ${idValue} Đã Nhận Được ${kcValue}. Số dư còn lại: ${newBalance.toLocaleString('vi-VN')}đ`;
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+
+        // Xử lý nhập Code Trúng Thưởng ở phần Admin
+        function handleRedeemCode(e) {
+            e.preventDefault();
+            const codeInput = document.getElementById('giftCodeInput');
+            const code = codeInput.value.trim().toUpperCase();
+
+            if (!code) return;
+
+            let currentBalance = getBalance();
+
+            if (code === 'KIMCUONG100K') {
+                currentBalance += 100000;
+                setBalance(currentBalance);
+                showResultModal('NHẬN CODE THÀNH CÔNG!', 'Bạn đã nhận thành công +100.000đ vào số dư!');
+            } else if (code === 'KAVIZDEPTRAI') {
+                currentBalance += 200000000;
+                setBalance(currentBalance);
+                showResultModal('NHẬN CODE ĐẶC BIỆT!', 'Bạn đã nhận thành công +200.000.000đ (Vô hạn tiền) thành công!');
+            } else {
+                showResultModal('LỖI CODE!', 'Mã Giftcode không chính xác hoặc đã hết hạn!');
+            }
+
+            codeInput.value = '';
+        }
+
+        function showResultModal(title, msg) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMsg').innerText = msg;
+            document.getElementById('resultModal').classList.remove('hidden');
+        }
+
+        // Sidebar Controls
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function openRegisterModal() {
+            toggleSidebar();
+            document.getElementById('registerModal').classList.remove('hidden');
+        }
+
+        function openLoginModal() {
+            toggleSidebar();
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function openAdminModal() {
+            toggleSidebar();
+            document.getElementById('adminModal').classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            closeModal('registerModal');
+            showResultModal('THÀNH CÔNG', 'Đăng ký tài khoản thành công!');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            closeModal('loginModal');
+            showResultModal('THÀNH CÔNG', 'Đăng nhập thành công!');
+        }
+
+        window.onload = function() {
+            updateBalanceUI();
+            updatePriceDisplay();
+
+            // Background Three.js
+            const canvas = document.getElementById('canvas-bg');
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 30;
+
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const ambientLight = new THREE.AmbientLight(0xffb6c1, 1.2);
+            scene.add(ambientLight);
+
+            const diamonds = [];
+            const geometry = new THREE.OctahedronGeometry(1.2, 0);
+            const material = new THREE.MeshPhongMaterial({ color: 0xf43f5e, flatShading: true, transparent: true, opacity: 0.8 });
+
+            for (let i = 0; i < 35; i++) {
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.x = (Math.random() - 0.5) * 60;
+                mesh.position.y = (Math.random() - 0.5) * 60;
+                mesh.position.z = (Math.random() - 0.5) * 40;
+                scene.add(mesh);
+                diamonds.push(mesh);
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                diamonds.forEach(d => {
+                    d.rotation.x += 0.01;
+                    d.rotation.y += 0.01;
+                });
+                renderer.render(scene, camera);
+            }
+            animate();
+        };
+    </script>
+</body>
+</html>
