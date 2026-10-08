@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>KAZI AIMLOCK IOS VIETNAM</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js for 3D Snowfall Background -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap');
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #020617;
+            color: #f1f5f9;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Glassmorphism Cyber Card */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(14, 165, 233, 0.35);
+            box-shadow: 0 10px 35px -5px rgba(2, 132, 199, 0.25);
+        }
+
+        .neon-glow {
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.8), 0 0 24px rgba(14, 165, 233, 0.5);
+        }
+
+        /* 3D Canvas Background */
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Virtual Crosshair Overlay */
+        #virtual-crosshair {
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0284c7;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between items-center selection:bg-cyan-500 selection:text-white">
+
+    <!-- 3D Snowfall Canvas Container -->
+    <canvas id="snow-canvas"></canvas>
+
+    <!-- Virtual Crosshair Overlay -->
+    <div id="virtual-crosshair" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="relative w-12 h-12 flex items-center justify-center">
+            <div class="absolute w-full h-[2px] bg-cyan-400 shadow-[0_0_10px_#38bdf8]"></div>
+            <div class="absolute h-full w-[2px] bg-cyan-400 shadow-[0_0_10px_#38bdf8]"></div>
+            <div class="w-3 h-3 rounded-full border-2 border-cyan-300 bg-cyan-500/60 shadow-[0_0_12px_#0284c7]"></div>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <header class="relative z-10 w-full max-w-4xl px-4 pt-6 pb-2 flex flex-col items-center">
+        <div class="flex items-center space-x-3 mb-1">
+            <i class="fa-solid fa-crosshairs text-cyan-400 text-3xl md:text-4xl animate-pulse"></i>
+            <h1 class="text-2xl md:text-4xl font-black font-orbitron tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-500 neon-glow text-center">
+                KAZI AIMLOCK IOS VIETNAM
+            </h1>
+        </div>
+        <p class="text-xs md:text-sm text-cyan-300/80 font-semibold uppercase tracking-widest text-center">
+            Hệ Thống Tối Ưu Hóa & VIP Menu iOS Premium
+        </p>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="relative z-10 w-full max-w-md px-4 py-4 my-auto">
+
+        <!-- Dynamic Toast Notification Box -->
+        <div id="toast" class="hidden mb-4 p-3.5 rounded-xl text-center font-bold text-xs transition-all duration-300 transform scale-95 opacity-0 glass-card"></div>
+
+        <!-- 1. KEY ACTIVATION CARD (NO KEY LEAKED IN PLACEHOLDER) -->
+        <section id="key-section" class="glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-500">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl"></div>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-cyan-950/70 border border-cyan-400/50 flex items-center justify-center text-cyan-400 text-2xl shadow-[0_0_20px_rgba(14,165,233,0.3)]">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h2 class="text-xl font-bold font-orbitron text-cyan-100">KÍCH HOẠT BẢO MẬT</h2>
+                <p class="text-xs text-slate-400 mt-1">Vui lòng nhập Key bản quyền 24h để sử dụng VIP Menu</p>
+            </div>
+
+            <form id="key-form" onsubmit="event.preventDefault(); verifyKey();" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-cyan-300 mb-1.5 uppercase tracking-wider">MÃ KEY ACCESS</label>
+                    <div class="relative">
+                        <!-- Key placeholder is standard text, completely hiding the actual key -->
+                        <input type="text" id="key-input" placeholder="Nhập Mã Key Bản Quyền..." 
+                            class="w-full bg-slate-900/90 border border-cyan-500/40 rounded-xl px-4 py-3 text-cyan-200 placeholder-slate-500 font-mono text-sm focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/30 transition-all uppercase">
+                        <button type="button" onclick="pasteKey()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-cyan-400 hover:text-cyan-200 px-2.5 py-1 bg-cyan-950/80 rounded-lg border border-cyan-800 transition-colors">
+                            <i class="fa-regular fa-clipboard mr-1"></i>Dán
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" 
+                    class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-600 via-sky-500 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold font-orbitron tracking-wider text-xs md:text-sm shadow-[0_0_20px_rgba(2,132,199,0.5)] active:scale-95 transition-all">
+                    XÁC NHẬN MỞ KHÓA
+                </button>
+            </form>
+        </section>
+
+        <!-- 2. DASHBOARD MENU SECTION -->
+        <section id="menu-section" class="hidden glass-card rounded-2xl p-6 relative overflow-hidden transition-all duration-500">
+            
+            <!-- Key Status Bar -->
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-cyan-500/20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-cyan-500/20 border border-cyan-400/50 flex items-center justify-center text-cyan-300">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-slate-400 uppercase tracking-wider">Trạng Thái Key</div>
+                        <div class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> Kích Hoạt 24H
+                        </div>
+                    </div>
+                </div>
+                <!-- Countdown Display -->
+                <div class="text-right">
+                    <div class="text-[10px] text-cyan-300 uppercase font-semibold">Còn Lại</div>
+                    <div id="countdown" class="font-mono text-sm font-bold text-cyan-200 bg-slate-950/80 px-2.5 py-1 rounded-lg border border-cyan-500/30">
+                        24:00:00
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation Header -->
+            <div class="flex rounded-xl bg-slate-950/80 p-1 border border-cyan-500/20 mb-5">
+                <button id="tab-aim-btn" onclick="switchTab('aim')" class="flex-1 py-2 rounded-lg text-xs font-bold font-orbitron transition-all bg-cyan-600 text-white shadow-md">
+                    <i class="fa-solid fa-sliders mr-1"></i> MENU VIP
+                </button>
+                <button id="tab-check-btn" onclick="switchTab('check')" class="flex-1 py-2 rounded-lg text-xs font-bold font-orbitron transition-all text-slate-400 hover:text-cyan-300">
+                    <i class="fa-solid fa-user-lock mr-1"></i> CHECK MK ACC
+                </button>
+            </div>
+
+            <!-- TAB 1: AIMLOCK & GAMING CONTROLS -->
+            <div id="tab-aim-content" class="space-y-4">
+                <div class="space-y-3">
+                    <!-- Aim Lock Switch -->
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-cyan-950 text-cyan-400"><i class="fa-solid fa-bullseye"></i></div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200">Bật Aim Lock</div>
+                                <div class="text-[10px] text-slate-400">Tự động ghim tâm vào đầu 99%</div>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-aimlock" onchange="handleToggle('Aim Lock', this)" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                        </label>
+                    </div>
+
+                    <!-- Nhẹ Tâm Switch -->
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-cyan-950 text-cyan-400"><i class="fa-solid fa-feather-pointed"></i></div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200">Nhẹ Tâm</div>
+                                <div class="text-[10px] text-slate-400">Kéo tâm siêu mượt không lo nặng tay</div>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-nhetam" onchange="handleToggle('Nhẹ Tâm', this)" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                        </label>
+                    </div>
+
+                    <!-- Tâm Ảo Switch -->
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-cyan-950 text-cyan-400"><i class="fa-solid fa-circle-dot"></i></div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200">Tâm Ảo</div>
+                                <div class="text-[10px] text-slate-400">Hiện tâm ngắm hỗ trợ trên màn hình</div>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-tamao" onchange="toggleVirtualCrosshair(this)" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                        </label>
+                    </div>
+
+                    <!-- Fix Lag Switch -->
+                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-900/60 border border-cyan-500/20 hover:border-cyan-500/40 transition-all">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-2 rounded-lg bg-cyan-950 text-cyan-400"><i class="fa-solid fa-bolt"></i></div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-200">Fix Lag</div>
+                                <div class="text-[10px] text-slate-400">Tối ưu bộ nhớ & ổn định FPS iOS</div>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="toggle-fixlag" onchange="handleToggle('Fix Lag', this)" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Free Fire Launchers -->
+                <div class="pt-3 border-t border-cyan-500/20">
+                    <label class="block text-xs font-semibold text-cyan-300 mb-2 uppercase tracking-wider text-center">
+                        <i class="fa-solid fa-gamepad mr-1"></i> MỞ GAME (APP STORE)
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- FF THƯỜNG -->
+                        <a href="https://apps.apple.com/vn/app/free-fire-booyah-day/id1300146617" target="_blank" rel="noopener noreferrer"
+                            class="flex flex-col items-center justify-center p-3 rounded-xl bg-gradient-to-br from-slate-900 to-cyan-950 border border-cyan-500/40 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(56,189,248,0.4)] transition-all group">
+                            <i class="fa-solid fa-fire text-amber-500 text-xl mb-1 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold font-orbitron text-slate-100">FF THƯỜNG</span>
+                            <span class="text-[9px] text-cyan-400/80">Open App Store</span>
+                        </a>
+
+                        <!-- FF MAX -->
+                        <a href="https://apps.apple.com/vn/app/free-fire-max/id1480516829" target="_blank" rel="noopener noreferrer"
+                            class="flex flex-col items-center justify-center p-3 rounded-xl bg-gradient-to-br from-slate-900 to-blue-950 border border-blue-500/40 hover:border-blue-400 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)] transition-all group">
+                            <i class="fa-solid fa-fire-flame-curved text-cyan-400 text-xl mb-1 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-bold font-orbitron text-slate-100">FF MAX</span>
+                            <span class="text-[9px] text-blue-400/80">Open App Store</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: CHECK MK ACC SECTION -->
+            <div id="tab-check-content" class="hidden space-y-4">
+                <div class="p-3 bg-cyan-950/40 border border-cyan-500/30 rounded-xl">
+                    <p class="text-xs text-cyan-200 leading-relaxed">
+                        <i class="fa-solid fa-shield-cat mr-1 text-cyan-400"></i> Tra cứu thông tin mật khẩu tài khoản hệ thống KAZI.
+                    </p>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-cyan-300 mb-1">TÊN ACC / MÃ ACC</label>
+                        <input type="text" id="acc-code-input" placeholder="Nhập tên acc..." 
+                            class="w-full bg-slate-950/90 border border-cyan-500/40 rounded-xl px-3.5 py-2.5 text-cyan-200 text-xs focus:outline-none focus:border-cyan-400">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-semibold text-cyan-300 mb-1">KEY XÁC THỰC ACC</label>
+                        <input type="password" id="sec-key-input" placeholder="Nhập key xác thực..." 
+                            class="w-full bg-slate-950/90 border border-cyan-500/40 rounded-xl px-3.5 py-2.5 text-cyan-200 text-xs focus:outline-none focus:border-cyan-400 font-mono">
+                    </div>
+
+                    <button onclick="checkAccountCredentials()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs font-orbitron transition-all">
+                        KIỂM TRA NGAY
+                    </button>
+                </div>
+
+                <!-- Account Credentials Result Panel -->
+                <div id="acc-result" class="hidden p-4 rounded-xl bg-slate-950/90 border-2 border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.2)] space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+                        <span class="text-xs font-bold text-emerald-400 uppercase font-orbitron">
+                            <i class="fa-solid fa-circle-check mr-1"></i> Đăng nhập X
+                        </span>
+                        <span class="text-[9px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">Khảo sát OK</span>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        <div>
+                            <span class="text-slate-400">Tên đăng nhập:</span>
+                            <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800 mt-1 font-mono text-cyan-300">
+                                <span>accclone2097</span>
+                                <button onclick="copyToClipboard('accclone2097', 'Đã chép Tên đăng nhập!')" class="text-cyan-400 hover:text-cyan-200">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <span class="text-slate-400">Mật khẩu:</span>
+                            <div class="flex justify-between items-center bg-slate-900 p-2 rounded-lg border border-slate-800 mt-1 font-mono text-emerald-300">
+                                <span>accclone2026</span>
+                                <button onclick="copyToClipboard('accclone2026', 'Đã chép Mật khẩu!')" class="text-cyan-400 hover:text-cyan-200">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer Option -->
+            <div class="mt-6 pt-3 border-t border-cyan-500/20 flex justify-between items-center text-xs text-slate-400">
+                <span>iOS Kernel Active</span>
+                <button onclick="logout()" class="text-red-400 hover:text-red-300 font-semibold transition-colors flex items-center gap-1">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất Key
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Page Footer -->
+    <footer class="relative z-10 w-full max-w-4xl px-4 py-4 text-center text-xs text-cyan-400/60">
+        <p>© 2026 KAZI AIMLOCK IOS VIETNAM. All rights reserved.</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // CORE CONSTANTS
+        const CORRECT_KEY = "KAZI-NKPE-ZQP-2097";
+        const REQUIRED_ACC_NAME = "áo_f168";
+        const SEC_ACC_KEY = "367";
+        const EXPIRATION_HOURS = 24;
+
+        let countdownInterval = null;
+
+        // 1. THREE.JS 3D SNOWFALL ANIMATION
+        function initSnow3D() {
+            const canvas = document.getElementById('snow-canvas');
+            const scene = new THREE.Scene();
+            
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            const particleCount = 400;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const velocities = [];
+
+            for (let i = 0; i < particleCount * 3; i += 3) {
+                positions[i] = (Math.random() - 0.5) * 15;
+                positions[i + 1] = (Math.random() - 0.5) * 15;
+                positions[i + 2] = (Math.random() - 0.5) * 15;
+
+                velocities.push({
+                    x: (Math.random() - 0.5) * 0.005,
+                    y: -Math.random() * 0.015 - 0.005,
+                    z: (Math.random() - 0.5) * 0.005
+                });
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+            const createSnowTexture = () => {
+                const canvasTex = document.createElement('canvas');
+                canvasTex.width = 32;
+                canvasTex.height = 32;
+                const ctx = canvasTex.getContext('2d');
+                
+                const grad = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                grad.addColorStop(0.5, 'rgba(56, 189, 248, 0.8)');
+                grad.addColorStop(1, 'rgba(14, 165, 233, 0)');
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(16, 16, 16, 0, Math.PI * 2);
+                ctx.fill();
+
+                return new THREE.CanvasTexture(canvasTex);
+            };
+
+            const material = new THREE.PointsMaterial({
+                size: 0.12,
+                map: createSnowTexture(),
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                const posAttr = geometry.attributes.position;
+                for (let i = 0; i < particleCount; i++) {
+                    let idx = i * 3;
+                    posAttr.array[idx] += velocities[i].x;
+                    posAttr.array[idx + 1] += velocities[i].y;
+                    posAttr.array[idx + 2] += velocities[i].z;
+
+                    if (posAttr.array[idx + 1] < -7) {
+                        posAttr.array[idx + 1] = 7;
+                        posAttr.array[idx] = (Math.random() - 0.5) * 15;
+                    }
+                }
+                posAttr.needsUpdate = true;
+                particles.rotation.y += 0.0008;
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        // 2. AUTHENTICATION & KEY SYSTEM
+        function checkExistingSession() {
+            const authTime = localStorage.getItem('kazi_auth_time');
+            if (authTime) {
+                const now = new Date().getTime();
+                const elapsed = now - parseInt(authTime);
+                const maxDuration = EXPIRATION_HOURS * 60 * 60 * 1000;
+
+                if (elapsed < maxDuration) {
+                    showMenuScreen();
+                    startCountdown(maxDuration - elapsed);
+                } else {
+                    localStorage.removeItem('kazi_auth_time');
+                    showToast('Key của bạn đã hết hạn 24 giờ!', 'error');
+                }
+            }
+        }
+
+        function verifyKey() {
+            const inputKey = document.getElementById('key-input').value.trim();
+
+            if (inputKey === CORRECT_KEY) {
+                const authTime = new Date().getTime();
+                localStorage.setItem('kazi_auth_time', authTime.toString());
+                
+                showToast('Kích hoạt Key thành công! 24 giờ sử dụng.', 'success');
+                setTimeout(() => {
+                    showMenuScreen();
+                    startCountdown(EXPIRATION_HOURS * 60 * 60 * 1000);
+                }, 500);
+            } else {
+                showToast('Key không chính xác hoặc đã hết hạn!', 'error');
+            }
+        }
+
+        function startCountdown(durationMs) {
+            if (countdownInterval) clearInterval(countdownInterval);
+
+            let remainingTime = durationMs;
+
+            const updateTimerDisplay = () => {
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    logout();
+                    showToast('Hết thời gian 24 giờ sử dụng Key!', 'error');
+                    return;
+                }
+
+                const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remainingTime % (1000 * 60)) / 1000);
+
+                document.getElementById('countdown').innerText = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                remainingTime -= 1000;
+            };
+
+            updateTimerDisplay();
+            countdownInterval = setInterval(updateTimerDisplay, 1000);
+        }
+
+        function showMenuScreen() {
+            document.getElementById('key-section').classList.add('hidden');
+            document.getElementById('menu-section').classList.remove('hidden');
+        }
+
+        function logout() {
+            localStorage.removeItem('kazi_auth_time');
+            if (countdownInterval) clearInterval(countdownInterval);
+            document.getElementById('menu-section').classList.add('hidden');
+            document.getElementById('key-section').classList.remove('hidden');
+            document.getElementById('key-input').value = '';
+            showToast('Đã đăng xuất Key', 'info');
+        }
+
+        // 3. TAB & FEATURE TOGGLES
+        function switchTab(tab) {
+            const aimTabBtn = document.getElementById('tab-aim-btn');
+            const checkTabBtn = document.getElementById('tab-check-btn');
+            const aimContent = document.getElementById('tab-aim-content');
+            const checkContent = document.getElementById('tab-check-content');
+
+            if (tab === 'aim') {
+                aimTabBtn.className = "flex-1 py-2 rounded-lg text-xs font-bold font-orbitron transition-all bg-cyan-600 text-white shadow-md";
+                checkTabBtn.className = "flex-1 py-2 rounded-lg text-xs font-bold font-orbitron transition-all text-slate-400 hover:text-cyan-300";
+                aimContent.classList.remove('hidden');
+                checkContent.classList.add('hidden');
+            } else {
+                checkTabBtn.className = "flex-1 py-2 rounded-lg text-xs font-bold font-orbitron transition-all bg-cyan-600 text-white shadow-md";
+                aimTabBtn.className = "flex-1 py-2 rounded-lg text-xs font-bold font-orbitron transition-all text-slate-400 hover:text-cyan-300";
+                checkContent.classList.remove('hidden');
+                aimContent.classList.add('hidden');
+            }
+        }
+
+        function handleToggle(featureName, checkbox) {
+            if (checkbox.checked) {
+                showToast(`Đã bật: ${featureName}`, 'success');
+            } else {
+                showToast(`Đã tắt: ${featureName}`, 'info');
+            }
+        }
+
+        function toggleVirtualCrosshair(checkbox) {
+            const crosshair = document.getElementById('virtual-crosshair');
+            if (checkbox.checked) {
+                crosshair.classList.remove('hidden');
+                showToast('Đã kích hoạt Tâm Ảo', 'success');
+            } else {
+                crosshair.classList.add('hidden');
+                showToast('Đã tắt Tâm Ảo', 'info');
+            }
+        }
+
+        // 4. CHECK ACC & KEY VERIFICATION LOGIC
+        function checkAccountCredentials() {
+            const accInput = document.getElementById('acc-code-input').value.trim();
+            const secKeyInput = document.getElementById('sec-key-input').value.trim();
+            const resultBox = document.getElementById('acc-result');
+
+            // 1. If Account code does not match "áo_f168"
+            if (accInput !== REQUIRED_ACC_NAME) {
+                resultBox.classList.add('hidden');
+                showToast('Không có acc tồn tại trên hệ thống KAZI', 'error');
+                return;
+            }
+
+            // 2. If Account is "áo_f168" but Key is not "367"
+            if (secKeyInput !== SEC_ACC_KEY) {
+                resultBox.classList.add('hidden');
+                showToast('Sai mã Key xác thực tài khoản!', 'error');
+                return;
+            }
+
+            // 3. Both match: Show account details
+            resultBox.classList.remove('hidden');
+            showToast('Xác thực tài khoản áo_f168 thành công!', 'success');
+        }
+
+        // 5. UTILITY FUNCTIONS
+        function pasteKey() {
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                navigator.clipboard.readText().then(text => {
+                    document.getElementById('key-input').value = text.trim();
+                }).catch(() => {
+                    showToast('Hãy dán mã thủ công!', 'info');
+                });
+            } else {
+                showToast('Hãy dán mã thủ công!', 'info');
+            }
+        }
+
+        function copyToClipboard(text, message) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast(message, 'success');
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+
+            if (type === 'success') {
+                toast.className = "mb-4 p-3.5 rounded-xl text-center font-bold text-xs bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.3)] block";
+            } else if (type === 'error') {
+                toast.className = "mb-4 p-3.5 rounded-xl text-center font-bold text-xs bg-red-950/90 text-red-300 border border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)] block";
+            } else {
+                toast.className = "mb-4 p-3.5 rounded-xl text-center font-bold text-xs bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] block";
+            }
+
+            toast.style.opacity = '1';
+            toast.style.transform = 'scale(1)';
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+
+        // Start initialization on window load
+        window.onload = function () {
+            initSnow3D();
+            checkExistingSession();
+        };
+    </script>
+</body>
+</html>
